@@ -1,3 +1,4 @@
 # Minimum requirements
 #
+pandas
 nibabel
