@@ -1,0 +1,5 @@
+# Requirements for building docs
+-r requirements.txt
+ghp-import
+numpydoc
+sphinx>=1.4
