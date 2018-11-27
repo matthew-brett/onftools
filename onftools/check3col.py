@@ -25,16 +25,19 @@ def check_task(tsv_path,
                old_path,
                task_def,
                model_no=1,
+               label_path=None,
                fail=False,
                onset_field='onset'):
     path, fname = psplit(tsv_path)
+    if label_path is None:
+        label_path = path
     sub_no, task_name, run_no = parse_tsv_name(tsv_path)
     run_part = '_run-%02d' % run_no if run_no is not None else ''
     cond_fnames = older_cond_filenames(sub_no, run_no, task_def, model_no)
     orig_df = pd.read_table(tsv_path)
     events = tsv2events(tsv_path, task_def)
     new_cond_prefix = pjoin(
-        path, 'sub-%02d_task-%s%s_label-' %
+        label_path, 'sub-%02d_task-%s%s_label-' %
         (sub_no, task_name, run_part))
     for i, name in enumerate(task_def['conditions']):
         ons_dur_amp = events[name]

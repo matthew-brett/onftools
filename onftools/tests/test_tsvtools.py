@@ -2,7 +2,7 @@
 """
 
 from os import unlink as remove
-from os.path import join as pjoin, exists, dirname, split as psplit
+from os.path import (join as pjoin, exists, dirname, split as psplit, relpath)
 from glob import glob
 from tempfile import TemporaryDirectory
 
@@ -196,31 +196,24 @@ def test_parse_tsv_name():
             (2, 'stopsignal', 2))
 
 
-def test_stopsignal():
-    for tsv_path in glob(pjoin(NEW_COND_PATH,
-                               'sub-*',
-                               'func',
-                               'sub*stopsignal*.tsv')):
-        check_task(tsv_path, OLD_COND_PATH, TASK_DEFS['stopsignal'])
-
-
-def test_er():
-    for tsv_path in glob(pjoin(NEW_COND_PATH,
-                               'sub-*',
-                               'func',
-                               'sub*emotionalregulation*.tsv')):
-        info = TASK_DEFS['emotionalregulation']
-        check_task(tsv_path, OLD_COND_PATH, info, fail=False)
-
-
-def test_td():
-    for tsv_path in glob(pjoin(NEW_COND_PATH,
-                               'sub-*',
-                               'func',
-                               'sub*discounting*.tsv')):
-        check_task(tsv_path, OLD_COND_PATH, TASK_DEFS['discounting'],
-                   fail=False,
-                   onset_field='onset_orig')
+def test_tasks():
+    for task_name, added_args in (
+        ('stopsignal', {}),
+        ('emotionalregulation', dict(fail=False)),
+        ('discounting', dict(fail=False, onset_field='onset_orig')),
+    ):
+        with TemporaryDirectory() as tmpdir:
+            info = TASK_DEFS[task_name]
+            task_defs = {task_name: info}
+            write_all_tasks(NEW_COND_PATH, task_defs, tmpdir)
+            for tsv_path in glob(pjoin(NEW_COND_PATH,
+                                       'sub-*',
+                                       'func',
+                                       'sub*{}*.tsv'.format(task_name))):
+                label_path = pjoin(tmpdir,
+                                   relpath(dirname(tsv_path), NEW_COND_PATH))
+                check_task(tsv_path, OLD_COND_PATH, info,
+                           label_path=label_path, **added_args)
 
 
 def test_older_cond_filenames():

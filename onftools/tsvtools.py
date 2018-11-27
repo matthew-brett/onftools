@@ -2,7 +2,8 @@
 """
 
 from glob import glob
-from os.path import join as pjoin, split as psplit
+from os import makedirs
+from os.path import join as pjoin, split as psplit, relpath, dirname, exists
 
 import numpy as np
 
@@ -105,7 +106,7 @@ def write_task(tsv_path, task_def, out_path=None):
             np.savetxt(new_fname, oda, '%f', '\t')
 
 
-def write_all_tasks(start_path, task_defs, out_path=None):
+def write_all_tasks(start_path, task_defs, out_root=None):
     """ Write .txt event files for all tasks with defined processing.
 
     Parameters
@@ -116,18 +117,26 @@ def write_all_tasks(start_path, task_defs, out_path=None):
         Keys are task names, values are dicts with keys 'processor' and
         'conditions'.  These are: a callable to process the read data frame,
         and the list of condition names.
-    out_path : None or str, optional
-        If str, directory to write output .txt files.  If None, use directory
-        containing the .tsv file, found by searching in `start_path`.
+    out_root : None or str, optional
+        If str, root directory to write output .txt files.  Files written in
+        subdirectories corresponding to subdirectories of TSV files found
+        within `start_path`.  If None, use directory containing the .tsv file,
+        found by searching in `start_path`.
     """
     globber = pjoin(start_path, 'sub-*', 'func', 'sub*tsv')
     matches = glob(globber)
     if len(matches) == 0:
         raise ValueError(f'No matches for glob "{globber}"')
     found = False
+    out_path = None
     for tsv_path in matches:
         sub_no, task_name, run_no = parse_tsv_name(tsv_path)
         if task_name in task_defs:
+            if out_root is not None:
+                rel_to_start = relpath(dirname(tsv_path), start_path)
+                out_path = pjoin(out_root, rel_to_start)
+                if not exists(out_path):
+                    makedirs(out_path)
             info = task_defs[task_name]
             write_task(tsv_path, info, out_path)
             found = True
