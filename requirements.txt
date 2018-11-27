@@ -1,4 +1,3 @@
 # Minimum requirements
 #
 pandas
-nibabel

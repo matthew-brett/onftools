@@ -3,4 +3,4 @@ include onftools/_version.py
 include README.rst
 include LICENSE
 include *requirements.txt
-recursive-include nibabel/tests/data *
+recursive-include onftools/tests/data *

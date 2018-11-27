@@ -4,11 +4,10 @@
 from os import unlink as remove
 from os.path import join as pjoin, exists, dirname, split as psplit
 from glob import glob
+from tempfile import TemporaryDirectory
 
 import numpy as np
 import pandas as pd
-
-from nibabel.tmpdirs import TemporaryDirectory
 
 from onftools.tsvtools import (parse_tsv_name, tsv2events, three_column,
                                write_all_tasks)
