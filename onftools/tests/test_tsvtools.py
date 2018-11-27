@@ -58,8 +58,10 @@ def ss_processor(df):
 
 # Code goes from button number to value on rating scale.  Reverse engineered
 # from the original rating_par_orig field.
-ER_RESPONSE_MAP = {'114': 4, '103': 3, '121': 2, '98': 1, '0': 0,
-                   'n/a': np.nan}
+# Pandas 0.20.3 loads this column as object.  0.23.4 seems to load as float.
+ER_RESPONSE_MAP_STR = {'114': 4, '103': 3, '121': 2, '98': 1, '0': 0,
+                       'n/a': np.nan}
+ER_RESPONSE_MAP_FLOAT = {114: 4, 103: 3, 121: 2, 98: 1, 0: 0, np.nan: np.nan}
 
 def er_processor(df):
     """ Process dataframe for ER trial types """
@@ -68,7 +70,9 @@ def er_processor(df):
         ['onset', 'duration', 'trial_type', 'image_type',
          'response', 'reaction_time']]
     # Recode the response values using the map above.
-    response = response.map(ER_RESPONSE_MAP)
+    er_response_map = (ER_RESPONSE_MAP_STR if response.dtype == np.object else
+                       ER_RESPONSE_MAP_FLOAT)
+    response = response.map(er_response_map)
     tt = trial_type.copy()  # A pandas series
     tt[(trial_type == 'attend') & (image_type == 'negative')] = 'attendneg'
     tt[(trial_type == 'attend') & (image_type == 'neutral')] = 'attendneu'
