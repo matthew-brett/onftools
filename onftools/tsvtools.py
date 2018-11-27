@@ -106,7 +106,7 @@ def write_task(tsv_path, task_def, out_path=None):
             np.savetxt(new_fname, oda, '%f', '\t')
 
 
-def write_all_tasks(start_path, task_defs, out_root=None):
+def write_tasks(start_path, task_defs, out_root=None):
     """ Write .txt event files for all tasks with defined processing.
 
     Parameters

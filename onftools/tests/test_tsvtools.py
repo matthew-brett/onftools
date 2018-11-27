@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 from onftools.tsvtools import (parse_tsv_name, tsv2events, three_column,
-                               write_all_tasks)
+                               write_tasks)
 from onftools.check3col import check_task, older_cond_filenames
 
 import pytest
@@ -209,7 +209,7 @@ def test_tasks():
         with TemporaryDirectory() as tmpdir:
             info = TASK_DEFS[task_name]
             task_defs = {task_name: info}
-            write_all_tasks(NEW_COND_PATH, task_defs, tmpdir)
+            write_tasks(NEW_COND_PATH, task_defs, tmpdir)
             for tsv_path in glob(pjoin(NEW_COND_PATH,
                                        'sub-*',
                                        'func',
@@ -246,12 +246,12 @@ def test_tsv2events():
                               'stopincorrect']
 
 
-def test_write_all_tasks():
+def test_write_tasks():
     with TemporaryDirectory() as out_dir:
         for to_write in (['stopsignal'], ['stopsignal', 'discounting']):
             # Write the files again
             defs = {k: v for k, v in TASK_DEFS.items() if k in to_write}
-            write_all_tasks(NEW_COND_PATH, defs, out_dir)
+            write_tasks(NEW_COND_PATH, defs, out_dir)
             # Check they are the same as the original run, or missing.
             for path in glob(pjoin(NEW_COND_PATH, 'sub-*', 'func', '*.txt')):
                 _, fname = psplit(path)
@@ -268,14 +268,14 @@ def test_write_all_tasks():
                 remove(made_path)
 
 
-def test_write_all_tasks_errors():
-    # Check write_all_tasks gives errors in some cases
+def test_write_tasks_errors():
+    # Check write_tasks gives errors in some cases
     defs = {k: v for k, v in TASK_DEFS.items()
             if k in ['stopsignal', 'discounting']}
     with pytest.raises(ValueError):
         # When no tsv files found
-        write_all_tasks(HERE, defs)
+        write_tasks(HERE, defs)
     defs = {'foo': defs['stopsignal']}
     with pytest.raises(ValueError):
         # When no matching tsv files found
-        write_all_tasks(NEW_COND_PATH, defs)
+        write_tasks(NEW_COND_PATH, defs)
